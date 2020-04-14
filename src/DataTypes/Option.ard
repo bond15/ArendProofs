@@ -1,0 +1,11 @@
+
+\data Option (A : \Type) | None | Some (a : A)
+
+\func map {A B :\Type} (oa : Option A) (f : A -> B) : Option B \elim oa
+  | None => None
+  | Some a => Some (f a)
+
+\func fold {A B : \Type} (oa : Option A) (alt : B) (f : A -> B) : B \elim oa
+  | None => alt
+  | Some a => f a
+

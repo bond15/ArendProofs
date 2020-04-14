@@ -1,0 +1,12 @@
+
+\data Vector (A : \Type) (i : Nat) \elim i
+  | 0 => vnil
+  | suc n => vcons A (Vector A n)
+
+
+\func head {A : \Type} {n : Nat} (vs : Vector A (suc n)) : A \elim vs
+  | vcons a _ => a
+
+
+\func tail {A : \Type} {n : Nat} (vs : Vector A (suc n)) : Vector A n \elim vs
+  | vcons _ vs => vs

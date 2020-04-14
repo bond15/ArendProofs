@@ -1,0 +1,39 @@
+
+\data List (A : \Type) | Nil | Cons (x : A) (xs : List A)
+
+\func \infix 6 append {A : \Type} (xs ys : List A) : List A \elim xs
+  | Nil => ys
+  | Cons x xs => Cons x (append xs ys)
+
+\func reverse {A : \Type} (as : List A) : List A => go Nil as \where
+  \func go {A : \Type} (acc as : List A) : List A
+    | acc, Nil => acc
+    | acc, (Cons a as) => go (Cons a acc) as
+
+\func map {A B : \Type} (f : A -> B) (as : List A) : List B \elim as
+  | Nil => Nil
+  | Cons a as => Cons (f a) (map f as)
+
+\func fold {A : \Type} (f : A -> A -> A) (i : A) (as : List A) : A \elim as
+  | Nil => i
+  | Cons a as => f a (fold f i as)
+
+
+
+
+
+-- Sanity checking
+
+\func l1 => Cons 1 (Cons 2 (Cons 3 Nil))
+
+\func rl1 => (Cons 3 (Cons 2 (Cons 1 Nil)))
+
+\func l2 => Cons 4 (Cons 5 (Cons 6 Nil))
+
+\func l3 => Cons 1 (Cons 2 (Cons 3 (Cons 4 (Cons 5 (Cons 6 Nil)))))
+
+\func test_append : l3 = (append l1 l2) => idp
+
+\func test_reverse : rl1 = reverse l1 => idp
+
+\func test_fold : (fold (\lam x => \lam y => Nat.+ x y) 0 l1) = 6 => idp
