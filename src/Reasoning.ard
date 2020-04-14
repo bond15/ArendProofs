@@ -1,0 +1,67 @@
+
+-- coe :  c : (A : I -> \Type ) (a : A left) (i : I)
+
+\func transport {A : \Type} (P : A -> \Type) {a a' : A} (p : a = a') (prf : P a) : P a'
+  => coe (\lam i => P (p @ i)) prf right
+
+-- reflexivity
+-- idp
+\func midp {A : \Type} {a : A} : a = a => path (\lam _ => a)
+-- left ==> a
+-- right ===> a
+
+-- symmetry
+\func inv {A : \Type} {a a' : A} (p : a = a') : a' = a
+  => transport (\lam x => x = a) p idp
+
+-- transitivity
+\func trans {A : \Type} {a a' a'' : A} (p : a = a') (q : a' = a'') : a = a''
+  => transport (\lam x => a = x) q p
+
+-- congruence
+\func pmap' {A B : \Type} (f : A -> B) {a a' : A} (p : a = a') : f a = f a'
+  => transport (\lam x => f a = f x) p idp
+
+-- alternative deff
+\func pmap {A B : \Type} (f : A -> B) {a a' : A} (p : a = a') : f a = f a'
+  => path (\lam i => f (p @ i))
+-- i = left ==> f (p @ left) ==> f a
+-- i = right ==> f (p @ right) ==> f a'
+
+-- product of paths?
+\func ex4 {A B :\Type} {a a' : A} {b b' : B} (p : a = a') (q : b = b') : (a,b) ={\Sigma A B} (a',b')
+  => path (\lam i => (p @ i, q @ i))
+
+\func funExt {A : \Type} (B : A -> \Type) {f g : \Pi (a : A) -> B a} (p : \Pi (a : A) -> f a = g a) : f = g =>
+  path (\lam i => \lam a => p a @ i)
+
+\func \infixr 5 *> {A : \Type} {a a' a'' : A} (p : a = a') (q : a' = a'') : a = a''
+  => transport (\lam x => a = x) q p
+
+
+\func +-comm (n m : Nat) : n Nat.+ m = m Nat.+ n
+  | 0, 0 => idp
+  | suc n, 0 => pmap suc (+-comm n 0)
+  | 0, suc m => pmap suc (+-comm 0 m)
+  | suc n, suc m => pmap suc (+-comm (suc n) m *> pmap suc (inv(+-comm n m)) *> +-comm n (suc m))
+
+
+\func t {A : \Type } {a : A} (p : a = a) : A => p @ right
+\func f {A B :\Type} (p : A = B) : \Type => p @ right
+
+\data T1 | C1
+\data T2 | C2
+-- path equality must only be between elements of the same type?
+-- no heterogeneous path?
+\func h : T1 ={\Type 0} T2 => {?}
+
+\data TYF1 (T : \Type) | HKC1 T
+\data TYF2 (T : \Type) | HKC2 T
+
+\func h2 : TYF1 ={\Type 0 -> \Type 0} TYF2 => {?}
+
+\data HKT1 | HC1 \Type
+\data HKT2 | HC2 \Type
+
+-- cannot be path in \Type 2
+\func h3 : HKT1 ={\Type 1} HKT2 => {?}

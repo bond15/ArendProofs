@@ -1,0 +1,10 @@
+
+\data Nat | Z | S Nat
+
+\func add (x y : Nat) : Nat \elim x
+  | Z => y
+  | S n => S (add n y)
+
+\func Z_n_eq_n (n : Nat) : add Z n = n =>
+  | Z => idp
+  | S n => {?}
