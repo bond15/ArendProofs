@@ -1,0 +1,41 @@
+
+\class Monoid (E : \Type)
+  | ide : E
+  | \infixl 7 * : E -> E -> E
+
+  | ide-left (x : E) : ide * x = x
+  | ide-right (x : E) : x * ide = x
+  | *-assoc (x y z : E) : (x * y) * z = x * (y * z)
+
+
+
+\data Bool | true | false
+
+\func not : Bool -> Bool => \lam (b : Bool) => b \elim
+  | true => false
+  | false => true
+
+
+
+\data List (A : \Type) | Nil | Cons (a : A) (xs : List A)
+
+\func app {A : \Type} (xs ys : List A) : List A => xs \elim
+  | Nil => ys
+  | Cons x xs => app (Cons x ys) xs
+
+
+
+\instance NatMonoid : Monoid Nat
+  | ide => 1
+  | * => Nat.*
+  | ide-left x => idp
+  | ide-right x => {?}
+  | *-assoc x y z => {?}
+
+
+--\instance ListMonoid (A : \Type) : Monoid (List A)
+--  | ide => Nil
+--  | * => app
+--  | ide-left xs => app Nil xs = xs
+--  | ide-right xs => app xs Nil = xs
+--  | *-assoc x y z =>

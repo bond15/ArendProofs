@@ -1,0 +1,69 @@
+\func f => 0
+
+\func g : Nat -> Nat -> Nat => \lam x y => x Nat.+ y
+
+\data empty
+
+\data Unit | unit
+
+\data Bool | false | true
+
+
+\func not (x : Bool) : Bool \with
+  | true => false
+  | false => true
+
+
+\data mNat | z | s mNat
+
+\func three => s (s (s z))
+
+{-  recursion allowed, only if it terminates and is structural
+- also functions must be total-}
+
+\func id( A : \Type)(a : A) => a
+
+\func test => id Bool true
+
+{- up the heirarchy -}
+\func test1 : Bool => true
+
+\func test2 : \Type => Bool
+
+\func test3 : \Type2 => \Type
+
+{- cumulative heirarchy -}
+\func test4 : \Type => \Type
+
+{- dependent function type -}
+{-
+\func test5 : \Pi (b : Bool) -> (if b Nat Int) =>
+  \lam x => (x \elim)-}
+
+
+{- dependent sigma types -}
+
+\func if {A B : \Type } (cond : Bool) (a : A) (b : B) => cond \elim
+  | true => a
+  | false => b
+
+{- if b is true, then the second element of the pair must be of type Nat
+   if b is false, then the second element of the pair must be of type Int
+ -}
+
+\func test6 : \Sigma (b : Bool) (if _ _ b Nat Bool) => (true,1)
+
+\func lessThan10 : \Sigma (n : Nat) (n Nat.<= 10) => (9,9)
+
+{- Why do these binders not hold?,
+binders at type level dont extend to term level? -}
+{-\func boring : \Sigma (b1 : Bool) (b2 : Bool) => (b1,b2) -}
+\func boring : \Sigma Bool Bool => (true,false)
+
+\func typelevelIF : Bool -> \Type  => \lam b => b \elim
+  | true => Nat
+  | false => Int
+
+\func dep : \Sigma (b : Bool) (if _ _ b Nat Int) => (true,unit)
+
+\func checl : Bool => idp

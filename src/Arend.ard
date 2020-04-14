@@ -1,0 +1,277 @@
+
+
+
+\module Basics \where {
+  {-
+  - Definitions: functions, data, classes, and records
+  -
+  - Prelude: Nat, Int, '='
+  - -}
+
+
+  \func foo (n : Nat) (i : Int) : Nat => n
+
+  {- equivalently, parameters of a function can be moved from the signature to the body -}
+
+  \func foo' : Nat -> Int -> Nat => \lam n i => n
+
+  \func foo'' : Nat -> Int -> Nat => \lam n => \lam i => n
+
+  {- binary operator infix syntax with left/right associativity and priority (1-9) level -}
+
+  \func \infix 6 PLUS (x y : Nat) => x Nat.+ y
+  \func test => 8 PLUS 9
+
+  {-  `op`  makes binary operator op infix -}
+
+  \data Empty
+  \data Unit | unit
+  \data Bool | tt | ff
+
+  {- inductive types can also mention the type being defined in the constructors.
+  however, the type can only appear as the last type in a constructor
+    ex)
+      ITYPE :=
+        c : A -> B -> ITYPE
+
+    This is called, strict positivity constraint.
+      this is not allowed
+        c : A -> ITYPE -> ITYPE
+
+      The tutorial shows how an omega := (lam x -> x x) (lam x -> x x)
+      can be derived without the positivity constraint.
+
+   -}
+
+  {- functions must be total
+      functions must terminate
+      recursion must be structural recursion
+   -}
+
+  {- non structurally recursive functions can be transformed to a structurally recursive
+  function by adding an extra parameter that shrinks on every calll
+
+  effectivily a 'gas' or 'fuel' parameter
+   -}
+
+
+\func ifT (cond : Bool) (A : \Type)  (B : \Type ) : \Type \elim cond
+  | tt => A
+  | ff => B
+
+
+\func if {A B : \Type}: \Pi (cond : Bool) (a : A) (b : B) -> (ifT cond A B) =>
+  \lam cond a b => \case cond \with {
+    | tt => a
+    | ff => b
+  }
+
+\data Vec (A : \Type)( n : Nat) \elim n
+  | 0 => fnil
+  | suc n => fcons A (Vec A n)
+
+\data Tn (n : Nat) \elim n
+  | 0 => z
+  | suc x =>
+
+\func Tn+ : \Pi {n1 n2 : Nat} (x : Tn n1) (y : Tn n2) -> Tn (n1 Nat.+ n2) => \lam x y => \case x, y \with {
+  | N q, N w => N ( q Nat.+ w)
+ }
+
+\func t : Tn 3 => N 4
+
+\func testTN : Tn 7 => (N 3) `Tn+` (N 4)
+
+\func ifT_test : \Type  => ifT tt Nat Bool
+
+{- Polymorphism -}
+{- quantification by a parameter?? -}
+\func id (A : \Type) (a : A) => a
+{- quantification expressed by a type??-}
+\func idT : \Pi (A : \Type ) (a : A) -> A => id
+
+{- \Pi is a dependent function type
+
+   \Pi (a : A) -> B(a) generalizes the function type A -> B
+
+   notice that the element of type A that is passed in is bound to
+   identifier 'a' at the TYPE LEVEL
+
+   The return type can be an expression! instead of a constant B
+   That expression can use the bound 'a' parameter to determine the output type
+
+   If the return type expression does not use the bound 'a' parameter, then the
+   type is just a simple function type
+ -}
+{- This function used the 'if' function at the type level and in the body -}
+\func exDepFunType : \Pi (b : Bool) -> if b Nat Bool => \lam c => if c 7 ff
+
+{- this function's return type doesn't depend on the input value, so it can be
+typed using a regular function type
+ -}
+
+\func bar : \Pi {A : \Type} (a : A) -> Nat => \lam _ => 7
+\func bar' (A : \Type) : A -> Nat => \lam _ => 7
+
+{- also equivalent -}
+{- type A is implicit -}
+\func bar'' {A : \Type} : A -> Nat => \lam _ => 7
+
+{- bar''' : A -> Nat -}
+\func bar''' (A : \Type) : Nat => 7
+
+{- the implicit type parameter is lifed to the outer function level -}
+\func bar'''' {A : \Type} : \Pi (a : A) -> Nat => \lam _ => 7
+
+
+\func id' {A : \Type } (a : A) => a
+
+\func id'test => id' 0
+{- explicity passing the implicit arguement -}
+\func id'test' => id' {Nat} 0
+
+ -- Constructors have implicit parameters for each of the parameters of data type
+-- ex data T has 3 parameters, so 'c' has 3 implicit parameters
+\data T (A B C : \Type) | c
+
+\func Ttest => c {Nat} {Int} {Bool}
+
+
+
+-- Sigma types aka Dependent pair types aka existential quantification
+-- \Sigma (a : A) (b : B(a))
+
+\func sigma : \Sigma (b : Bool) (ifT b Nat Bool) => (tt,7)
+\data T1 | A
+\data T2 | B
+\func sigma' : \Sigma (b : Bool)(ifT b T1 T2) => (tt, A)
+\func sigma'' : \Sigma (b : Bool)(ifT b T1 T2) => (ff, B)
+}
+
+
+
+\module PropositionsAndProof \where {
+  -- propositions as types
+  -- true propositions corresponds to unit
+  -- false propositions corresponds to the empty type
+
+  -- not every type should be thought of as a proposition
+
+  \data Empty
+
+  \data Unit | unit
+
+  \func absurd {A : \Type} (e : Empty) : A
+
+  -- collection of functions from Empty -> A
+  -- initial object
+
+  \func Unit-isTrue : Unit => unit
+
+  -- terminal object
+
+  -- implication is function type
+
+  \func \infixr 3 && (P Q : \Type) => \Sigma P Q
+
+  \func &&-intro {P Q : \Type}(p : P)(q : Q) : \Sigma P Q => (p,q)
+
+  \func &&-elim1 {P Q : \Type}(t : \Sigma P Q): P => t.1
+
+  \func &&-elim2 {P Q : \Type}(t : \Sigma P Q): Q => t.2
+
+  \func curry {P Q R : \Type}: ((P && Q) -> R) -> P -> Q -> R =>
+    \lam h => \lam p => \lam q => h (&&-intro p q)
+
+  \func uncurry {P Q R : \Type}: (P -> Q -> R) -> (P && Q) -> R =>
+    \lam h => \lam pq => h pq.1 pq.2
+
+  \data \infixr 2 || (P Q : \Type)
+    | inl P
+    | inr Q
+
+  \func ||-intro1 {P Q : \Type} (p : P) : P || Q => inl p
+
+  \func ||-intro2 {P Q : \Type} (q : Q) : P || Q => inr q
+
+  \func ||-elim {P Q R : \Type} (l : P -> R) (r : Q -> R) (x : P || Q) : R \elim x
+    | inl p => l p
+    | inr q => r q
+
+  \func shuffle {P Q R : \Type} : ((P || Q) -> (P && Q)) -> ((P -> Q) && (Q -> P)) =>
+    \lam h => {?}
+
+  \func forall => \Pi {A : \Type} {P : A -> \Type} (a : A) -> P(a)
+
+  \func exists(A : \Type)(P : A -> \Type) => \Sigma (a : A) (P(a))
+
+  \data Bool | true | false
+
+  \func T (b : Bool) : \Type
+    | true => Unit
+    | false => Empty
+
+  \func not (b : Bool) : Bool
+    | true => false
+    | false => true
+
+  \func \infix 4 == (x y : Bool) : Bool
+    | true, true => true
+    | false, false => true
+    | _,_ => false
+
+  \func not-isInvolution (x : Bool) : T(not(not x) == x)
+    | true => unit
+    | false => unit
+
+  \func ==-refl (x : Bool) : T (x == x)
+    | true => unit
+    | false => unit
+
+  \func lemma (x : Bool) : \Sigma (y : Bool) (T (x == y)) =>
+    (x,==-refl x)
+
+  \func not-isInvolution' (x : Bool) : not (not x) = x
+    | true => idp
+    | false => idp
+
+  \func simplefact : 2 Nat.+ 2 = 4 => idp
+
+  \func and-assoc {P Q R : \Type} : ((P && Q) && R) = (P && (Q && R)) => {?}
+}
+
+
+\module IndexedTypes \where {
+  \func \infix 4 + => Nat.+
+  \func +-assoc (x y z : Nat) : (x + y) + z = x + ( y + z) \elim z
+    | 0 => idp
+    | suc z => {?}
+
+}
+
+
+\module Equality \where {
+  \func Leibniz {A : \Type} {a a' : A}
+                (f : \Pi (P : A -> \Type) -> \Sigma (P a -> P a') (P a' -> P a)) : a = a'
+    => (f (\lam x => a = x)).1 idp
+
+
+  \func transport {A : \Type} ( B : A -> \Type) { a a' : A} (p : a = a')(b : B a) : B a' =>
+    coe (\lam i => B (p @ i)) b right
+
+  \func pmap {A B : \Type} (f : A -> B) {a a' : A}(p : a = a'): f a = f a'
+     => transport (\lam x => f a = f x) p idp
+
+
+  \data Bool | true | false
+  \func isItFour : Nat -> Bool => \lam n => \case n \with {
+    | 4 => true
+    | _ => false
+  }
+
+  \func testPmap : isItFour 4 = isItFour (2 Nat.+ 2) =>
+    pmap {Nat} {Bool} isItFour {4} {2 Nat.+ 2} idp
+
+-- coe : ( A : I -> \Type  ) (a : A left) ( i : I)
+}
+

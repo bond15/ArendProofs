@@ -1,0 +1,65 @@
+\import example
+
+{- identity type '=' -}
+{- show it is an equality relation,
+Reflexivity
+  idp { A : \Type } {a : A} : a = a
+
+
+ -}
+{- homogeneous transport?  between element of a -}
+\func transport { A : \Type } ( B : A -> \Type) { a a' : A} (p : a = a' ) (b : B a)
+  : B a' => coe (\lam i => B (p @ i)) b right
+
+
+{- interval type  \data I | left | right | <some other thing we dont have access to>
+- pattern matching on I is prohibited since it can be used to derive Unit = Empty
+- -}
+
+{-
+  equality left = right implies that some a : A and a' : A are equal
+  iff
+  there exists a function f : I -> A
+  s.t.
+    f left ==> a
+    f right ==> a'
+
+      where '==>' denotes computational equality
+
+
+  the type a ={A} a'
+    is defined as the type of all functions
+      f : I -> A
+      satisfying the above propety
+
+
+
+
+
+
+
+ -}
+
+
+
+
+\data TY | a | b
+\func t : a = a => idp
+\func f : a = b => idp
+
+
+
+{-
+Path A a a'
+
+constructor
+  path (\Pi ( i : I ) -> A i)
+
+path takes some function 'f'
+additional constraints for 'f'
+
+f left = a
+f right = a'
+
+ -}
+\func test : Path Bool true false => \lam i : I => false
