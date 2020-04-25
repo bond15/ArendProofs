@@ -523,6 +523,11 @@
 
 -- Higher inductive type
 
+-- Higher inductive types allow for stating equality between elements of a type
+-- Here we define the Integers using the Naturals.
+-- Without HITs, there would be two representaitons of zero in this type. neg zero and pos zero
+-- With HIT we can explicity state that neg zero and pos zero are equal elements.
+
 \data Int'
   | neg Nat
   | pos Nat
@@ -530,6 +535,84 @@
     | left => neg zero
     | right => pos zero
   }
+-- Before HITs, people used Setoids and Quotient types, but their rewrite laws proved to be cumbersome.
+
+-- Demonstration of tranport
+
+-- what if we have two types that are equivalent? Can we show that they are?
+
+\data Bool1 | tt1 | ff1
+\data Bool2 | tt2 | ff2
+
+-- these two types are basically the same!
+-- we can get a proof that these two type are equal if we have an isomorphism between them
+-- an isomorphism is a pair of function which are mutual inverses.
+
+-- function from Bool1 to Bool2
+\func Bool1_to_Bool2 (b : Bool1) : Bool2
+  | tt1 => tt2
+  | ff1 => ff2
+
+-- function from Bool2 to Bool1
+\func Bool2_to_Bool1 (b : Bool2) : Bool1
+  | tt2 => tt1
+  | ff2 => ff1
+
+-- prove that they are inverses of eachother
+\func Bool1_to_Bool2_to_Bool1 (b : Bool1) : Bool2_to_Bool1 (Bool1_to_Bool2 b) = b
+  | tt1 => idp
+  | ff1 => idp
+
+\func Bool2_to_Bool1_to_Bool2 (b : Bool2) : Bool1_to_Bool2 (Bool2_to_Bool1 b) = b
+  | tt2 => idp
+  | ff2 => idp
+
+-- Given an isomorpism between the types, construct a proof of equality
+\func Bool1=Bool2 : Bool1 = Bool2 =>
+  path(iso Bool1_to_Bool2 Bool2_to_Bool1 Bool1_to_Bool2_to_Bool1 Bool2_to_Bool1_to_Bool2)
+
+-- If Bool1 and Bool2 are equal, can we show types defined over these types equivalent?
+-- ex) can we show Option Bool1 = Option Bool2?
+-- yes!
+\data Option (A : \Type) | None | Some A
+
+\func Option_Bool1=Option_Bool2 : Option Bool1 = Option Bool2 =>
+  path(\lam i => Option (Bool1=Bool2 @ i))
+
+
+-- what about functions?
+-- if we have not1 defined on Bool1, can we get not2 defined on Bool2?
+-- Yes! (but in Arend, the resulting not2 does not reduce (yet), but in cubical Agda, this would behave as expected)
+
+-- first define the not function on Bool1
+\func not1 (b : Bool1) : Bool1
+  | tt1 => ff1
+  | ff1 => tt1
+
+-- Then we can use transport to lift this definition to Bool2
+\func transport { A : \Type } ( B : A -> \Type) { a a' : A} (p : a = a' ) (b : B a)
+  : B a' => coe (\lam i => B (p @ i)) b right
+
+-- how?
+-- we specify the type of the thing we are transporing, here a function from X -> X or Bool2 -> Bool2
+-- we specify the path to tranport over, here Bool1=Bool2
+-- we specify what definition to transport, here not1
+\func not2' : Bool2 -> Bool2 => transport (\lam X => X -> X) Bool1=Bool2 not1
+
+-- using the result, we can rewrite it to...
+\func not2 (b : Bool2) : Bool2 => not2' b
+
+
+-- what about a function on Option Bool1 to Option Bool2? Can we transport that as well?
+-- yes! :)
+\func not1_option (b : Option Bool1) : Option Bool1
+  | None => None
+  | Some tt1 => Some ff1
+  | Some ff1 => Some tt1
+
+\func not2_option' : Option Bool2 -> Option Bool2 =>
+  transport (\lam X => X -> X) Option_Bool1=Option_Bool2 not1_option
+
 
 
 -- Wrapping up
