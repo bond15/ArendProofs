@@ -1,9 +1,9 @@
 
-\data List (A : \Type) | Nil | Cons (x : A) (xs : List A)
+\data List (A : \Type) | Nil | Cons (a : A) (as : List A)
 
-\func \infix 6 append {A : \Type} (xs ys : List A) : List A \elim xs
+\func \infix 6 ++ {A : \Type} (xs ys : List A) : List A \elim xs
   | Nil => ys
-  | Cons x xs => Cons x (append xs ys)
+  | Cons x xs => Cons x (xs ++ ys)
 
 \func reverse {A : \Type} (as : List A) : List A => go Nil as \where
   \func go {A : \Type} (acc as : List A) : List A
@@ -19,6 +19,15 @@
   | Cons a as => f a (fold f i as)
 
 
+\func pmap {A B : \Type} (f : A -> B) {a a' : A} (p : a = a') : f a = f a'
+  => path (\lam i => f (p @ i))
+
+\func ++-assoc {A : \Type} (xs ys zs : List A) : (xs ++ ys) ++ zs = xs ++ (ys ++ zs)
+ \elim xs
+  | Cons a as => pmap (\lam x => Cons a x) (++-assoc as ys zs)
+  | Nil => idp
+
+
 
 
 
@@ -32,7 +41,7 @@
 
 \func l3 => Cons 1 (Cons 2 (Cons 3 (Cons 4 (Cons 5 (Cons 6 Nil)))))
 
-\func test_append : l3 = (append l1 l2) => idp
+\func test_append : l3 = (l1 ++ l2) => idp
 
 \func test_reverse : rl1 = reverse l1 => idp
 

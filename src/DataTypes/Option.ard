@@ -1,11 +1,33 @@
 
 \data Option (A : \Type) | None | Some (a : A)
 
-\func map {A B :\Type} (oa : Option A) (f : A -> B) : Option B \elim oa
+\func map {A B :\Type} (f : A -> B) (oa : Option A) : Option B \elim oa
   | None => None
   | Some a => Some (f a)
 
 \func fold {A B : \Type} (oa : Option A) (alt : B) (f : A -> B) : B \elim oa
   | None => alt
   | Some a => f a
+
+\func id {A : \Type} (a : A) : A => a
+
+
+\func map-id {A :\Type} (oa : Option A) : map id oa = oa \with
+  | None => idp
+  | Some a => idp
+
+\func map-comp{A B C :\Type} (f :  A ->  B)
+  (g : B ->  C) (oa : Option A) : map (\lam a => g (f a)) oa = map g (map f oa)
+=> \case oa \with{
+  | None => idp
+  | Some a => idp
+}
+
+
+
+\class Functor (F : \Type -> \Type )
+  | fmap {A B : \Type} (f : A -> B) : F A -> F B
+  | fmap-id {A : \Type} (e : F A) : fmap id e = id e
+  | fmap-comp {A B C : \Type} (f : A -> B) (g : B -> C) (e : F A)
+  : fmap (\lam a => g (f a)) e = fmap g (fmap f e)
 

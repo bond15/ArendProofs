@@ -83,16 +83,31 @@
     | right => neg 0
 }
 
-\func Iadd (x y : Int-HIT) : Int-HIT
-  | pos n, y => {?}
-  | neg n, y => {?}
-  | zeq i, y => y
+--\func Iadd (x y : Int-HIT) : Int-HIT
+--  | pos n, y => {?}
+--  | neg n, y => {?}
+--  | zeq i, y => y
 
 -- https://github.com/agda/cubical/blob/hottschool2019/Cubical/HoTTSchool.agda
+--
+--\data quotient {A : \Type} {R : \Sigma A A}
+--  | pt (a : A)
+--  | rel (a b : A) (u : (R a b)) I \with {}
 
-\data quotient {A : \Type} {R : \Sigma A A}
-  | pt (a : A)
-  | rel (a b : A) (u : (R a b)) I \with {}
+
+\data Fin (n : Nat) \with
+  | suc n => { fzero | fsuc (Fin n) }
 
 
+\data Vecc {A : \Type} (n : Nat) (m : Fin n) \with
+  | {a}, suc n, fsuc m => { vnil | v:: {a} (Vecc {a} n m)}
 
+\func s : Fin 1 => fzero
+
+\func s1 : Vecc {Nat} 2 (fsuc fzero) => v:: {Nat} vnil
+
+
+\data Bool | true | false
+\data T (b : Bool) \with
+  | true => C1
+  | false => C2

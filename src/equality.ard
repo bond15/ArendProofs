@@ -11,6 +11,17 @@ Reflexivity
 \func transport { A : \Type } ( B : A -> \Type) { a a' : A} (p : a = a' ) (b : B a)
   : B a' => coe (\lam i => B (p @ i)) b right
 
+\func \infixr 5 *> {A : \Type} {a a' a'' : A} (p : a = a') (q : a' = a'') : a = a''
+  => transport (\lam x => a = x) q p
+
+\func \infix 2 qed {A : \Type} (a : A) : a = a => idp
+
+\func \infixr 1 >== {A : \Type} {a a' a'' : A} (p : a = a') (q : a' = a'') => p *> q
+
+\func \infix 2 ==< {A : \Type} (a : A) {a' : A} (p : a = a') => p
+
+\func pmap {A B : \Type} (f : A -> B) {a a' : A} (p : a = a') : f a = f a'
+  => path (\lam i => f (p @ i))
 
 {- interval type  \data I | left | right | <some other thing we dont have access to>
 - pattern matching on I is prohibited since it can be used to derive Unit = Empty
