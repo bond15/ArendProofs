@@ -512,9 +512,15 @@
 
 \func test : \Type 1 => \Set
 
+-- This definition states that \Set (which is a universe of types) is a category.
+-- Objects of this category are Types in \Set
+-- morphisms are functions between Types in \Set
 \instance SetCat : Category \Set
+  -- The function type represents the type of morphisms in this category
   | Hom X Y => X -> Y
+  -- this is the polymorphic definition of id morphisms for this category
   | id _ => \lam x => x
+  -- this is the polymorphic definition of composition for this category.
   | o g f => \lam x => (g (f x))
   | id-left f => idp
   | id-right f => idp
